@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GbR Steuerrücklagen-Rechner
 
-## Getting Started
+Ein Tool zur Berechnung der notwendigen Steuerrücklagen für GbR-Partner basierend auf ihren individuellen steuerlichen Situationen.
 
-First, run the development server:
+## Features
+
+- Eingabe der persönlichen Einkommensdaten für beide Partner
+- Konfiguration der GbR-Gewinnprognose und Gewinnverteilung
+- Automatische Berechnung der progressiven Steuersätze
+- Berechnung der individuellen Steuerrücklagen pro Partner
+- Automatisches Speichern der Eingaben im Browser
+- Responsive Design für alle Geräte
+
+## Technologien
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+## Lokale Entwicklung
 
 ```bash
+# Abhängigkeiten installieren
+npm install
+
+# Entwicklungsserver starten
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Die Anwendung ist dann unter [http://localhost:3000](http://localhost:3000) erreichbar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Projektstruktur
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/components/` - React-Komponenten
+- `src/app/utils/` - Utility-Funktionen für Steuerberechnungen
+- `src/app/types/` - TypeScript-Typdefinitionen
 
-## Learn More
+## Steuerliche Hinweise
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Die Berechnung basiert auf einer vereinfachten Darstellung des deutschen Einkommensteuergesetzes und dient als Richtwert. Für eine genaue steuerliche Beratung wenden Sie sich bitte an einen Steuerberater.
