@@ -96,4 +96,7 @@ export interface CalculatorState {
   language: 'de' | 'en';
   advancedMode: boolean;
   safetyMargin: number;
-} 
+}
+
+// Export all payment management types
+export * from './paymentManagement'; 

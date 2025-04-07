@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PartnerData, GbRData, TaxReserveResult, CalculatorState, createDefaultPartner, FederalState } from '../types';
 import { 
   calculateTaxReserve, 
-  setDebugMode, 
+  setDebugMode as setDebugModeInCalc, 
   forceDebugTest, 
   calculateEquitableGbRTaxReserves,
   GbRType,
@@ -35,10 +35,10 @@ export default function TaxReserveCalculator() {
   // Enable/disable debug mode
   useEffect(() => {
     console.log("Setting debug mode to:", debugMode, "with detail level:", debugDetailLevel);
-    setDebugMode(debugMode, debugDetailLevel);
+    setDebugModeInCalc(debugMode, debugDetailLevel);
     
     // Force recalculation with new debug setting
-    if (partners.length > 0 && gbr.monthlyProfit > 0) {
+    if (debugMode && partners.length > 0 && gbr.monthlyProfit > 0) {
       calculateResults(partners, gbr, safetyMargin);
     }
   }, [debugMode, debugDetailLevel]);
@@ -72,10 +72,10 @@ export default function TaxReserveCalculator() {
         setAdvancedMode(state.advancedMode);
         setSafetyMargin(state.safetyMargin);
         
-        // Also calculate results based on loaded state
-        if (state.partners.length > 0 && state.gbr.monthlyProfit > 0) {
-          calculateResults(state.partners, state.gbr, state.safetyMargin);
-        }
+        // Don't auto-calculate on load
+        // if (state.partners.length > 0 && state.gbr.monthlyProfit > 0) {
+        //  calculateResults(state.partners, state.gbr, state.safetyMargin);
+        // }
       } catch (error) {
         console.error('Failed to load saved state:', error);
       }
@@ -95,13 +95,6 @@ export default function TaxReserveCalculator() {
     
     localStorage.setItem('taxCalculatorState', JSON.stringify(state));
   }, [partners, gbr, results, language, advancedMode, safetyMargin]);
-  
-  // Calculate results whenever inputs change
-  useEffect(() => {
-    if (partners.length > 0 && gbr.monthlyProfit > 0) {
-      calculateResults(partners, gbr, safetyMargin);
-    }
-  }, [partners, gbr, safetyMargin]);
   
   // Handle partner data changes
   const handlePartnerChange = (updatedPartner: PartnerData) => {
@@ -208,6 +201,26 @@ export default function TaxReserveCalculator() {
     gbrData: GbRData, 
     margin: number
   ) => {
+    // Add debug statement at start of calculation
+    console.warn("[CALCULATOR] Starting tax calculation process...");
+    
+    // Extra debug test to ensure debug system is working
+    if (debugMode) {
+      console.warn("[CALCULATOR DEBUG] Running with debug enabled at level:", debugDetailLevel);
+      // Try direct DOM writing as a test
+      try {
+        const debugElement = document.getElementById('debug-output');
+        if (debugElement) {
+          const testMsg = document.createElement('div');
+          testMsg.className = 'text-xs mb-1 text-purple-600 font-bold';
+          testMsg.textContent = `[DIRECT TEST] Calculation started with debug level ${debugDetailLevel}`;
+          debugElement.appendChild(testMsg);
+        }
+      } catch (e) {
+        console.error('Error writing direct debug test to UI:', e);
+      }
+    }
+    
     // Validate the total share is 100%
     const totalShare = partnerList.reduce((sum, partner) => sum + partner.share, 0);
     if (Math.abs(totalShare - 100) > 0.01) {

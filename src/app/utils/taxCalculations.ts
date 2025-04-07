@@ -54,6 +54,29 @@ export const setDebugMode = (isDebug: boolean, detailLevel: number = 1): void =>
   DEBUG_MODE = isDebug;
   DEBUG_DETAIL_LEVEL = Math.min(Math.max(detailLevel, 1), 3); // Ensure between 1-3
   console.log(`[TAX CALCULATOR] Debug mode ${isDebug ? 'ENABLED' : 'DISABLED'} at detail level ${DEBUG_DETAIL_LEVEL}`);
+  
+  // Force a debug log to test if it's working
+  if (isDebug) {
+    console.warn(`[TAX DEBUG TEST] Debug mode is ON at level ${DEBUG_DETAIL_LEVEL}. Debug logs should now appear.`);
+    
+    // Try to update the DOM debug container
+    setTimeout(() => {
+      try {
+        const debugElement = document.getElementById('debug-output');
+        if (debugElement) {
+          const testMsg = document.createElement('div');
+          testMsg.className = 'text-xs mb-1 text-red-600 font-bold';
+          testMsg.textContent = `[DEBUG TEST] Debug mode activated at level ${DEBUG_DETAIL_LEVEL}`;
+          debugElement.appendChild(testMsg);
+          
+          // Auto-scroll to bottom
+          debugElement.scrollTop = debugElement.scrollHeight;
+        }
+      } catch (e) {
+        console.error('Error writing debug test to UI:', e);
+      }
+    }, 0);
+  }
 };
 
 const logDebug = (message: string, data?: any, level: number = 1): void => {
@@ -68,8 +91,9 @@ const logDebug = (message: string, data?: any, level: number = 1): void => {
   const indent = '  '.repeat(level - 1);
   const formattedMessage = `${indent}${message}`;
   
-  // Force console output
+  // Force console output - use both console.warn and console.log for higher visibility
   console.warn(`${prefix} ${formattedMessage}`, data || '');
+  console.log(`${prefix} ${formattedMessage}`, data || '');
   
   // Also try to update the DOM debug container
   setTimeout(() => {
