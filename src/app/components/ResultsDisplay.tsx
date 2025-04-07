@@ -25,7 +25,8 @@ export default function ResultsDisplay({
   taxYear,
   safetyMargin
 }: ResultsDisplayProps) {
-  const [expandedPartnerId, setExpandedPartnerId] = useState<string | null>(null);
+  // State for expanded partner details
+  const [expandedPartners, setExpandedPartners] = useState<{ [key: string]: boolean }>({});
   
   if (!results) {
     return null;
@@ -39,14 +40,19 @@ export default function ResultsDisplay({
   };
 
   const formatPercentage = (value: number) => {
-    return `${(value * 100).toFixed(1)}%`;
+    return new Intl.NumberFormat(language === 'de' ? 'de-DE' : 'en-US', {
+      style: 'percent',
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    }).format(value);
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(language === 'de' ? 'de-DE' : 'en-US', { 
-      style: 'currency', 
+    return new Intl.NumberFormat(language === 'de' ? 'de-DE' : 'en-US', {
+      style: 'currency',
       currency: 'EUR',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(value);
   };
 
@@ -75,24 +81,18 @@ export default function ResultsDisplay({
   };
 
   const togglePartnerDetails = (partnerId: string) => {
-    if (expandedPartnerId === partnerId) {
-      setExpandedPartnerId(null);
-    } else {
-      setExpandedPartnerId(partnerId);
-    }
+    setExpandedPartners(prev => ({
+      ...prev,
+      [partnerId]: !prev[partnerId]
+    }));
   };
 
-  // Calculate the raw tax rate (without safety margin)
-  const getRawTaxRate = (effectiveTaxRate: number) => {
-    return effectiveTaxRate / (1 + safetyMargin);
-  };
-  
-  // Calculate the raw reserve amount (without safety margin)
+  // Calculate raw monthly reserve amount (without safety margin)
   const getRawReserveAmount = (reserveAmount: number) => {
     return reserveAmount / (1 + safetyMargin);
   };
   
-  // Calculate the safety margin amount
+  // Calculate safety margin amount
   const getSafetyMarginAmount = (reserveAmount: number) => {
     const rawAmount = getRawReserveAmount(reserveAmount);
     return reserveAmount - rawAmount;
@@ -103,153 +103,148 @@ export default function ResultsDisplay({
   const totalSafetyMarginAmount = getSafetyMarginAmount(results.totalReserveAmount);
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-900">
-          {translations.resultTitle}
-        </h2>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => handleExport('csv')}
-            className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-900"
-          >
-            {translations.exportCSV}
-          </button>
-          <button 
-            onClick={() => handleExport('json')}
-            className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-900"
-          >
-            {translations.exportJSON}
-          </button>
-          <button 
-            onClick={() => handleExport('pdf')}
-            className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded text-gray-900"
-          >
-            {translations.exportPDF}
-          </button>
+    <div className="bg-white p-6 rounded-lg shadow-md mt-4">
+      <h2 className="text-xl font-bold mb-4">{translations.resultTitle}</h2>
+      
+      {/* Total Tax Reserve Box */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+        <h3 className="text-lg font-semibold text-blue-800 mb-3">{translations.totalReserveTitle}</h3>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600">{translations.percentageLabel}</p>
+            <p className="text-lg font-semibold">{formatPercentage(results.totalReservePercentage)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600">{translations.monthlyAmountLabel}</p>
+            <p className="text-lg font-semibold">{formatCurrency(totalRawReserveAmount)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600">{translations.safetyMarginAmountLabel}</p>
+            <p className="text-lg font-semibold">{formatCurrency(totalSafetyMarginAmount)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600">{translations.annualTaxBurdenLabel}</p>
+            <p className="text-lg font-semibold">{formatCurrency(results.annualTaxBurden)}</p>
+          </div>
         </div>
       </div>
-
-      <div className="space-y-4">
-        <div className="bg-gray-50 p-3 rounded-md">
-          <h3 className="font-semibold text-lg mb-2 text-gray-900">{translations.totalReserveTitle}</h3>
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-800">{translations.percentageLabel}</span>
-            <span className={`font-bold ${getTaxRateColor(getRawTaxRate(results.totalReservePercentage))}`}>
-              {formatPercentage(getRawTaxRate(results.totalReservePercentage))}
-            </span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-800">{translations.monthlyAmountLabel}</span>
-            <span className="font-bold">
-              {formatCurrency(totalRawReserveAmount)}
-            </span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-800">{translations.safetyMarginLabel}</span>
-            <span className="font-bold">
-              {formatCurrency(totalSafetyMarginAmount)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-800">{translations.annualTaxBurdenLabel}</span>
-            <span className="font-bold">
-              {formatCurrency(results.annualTaxBurden)}
-            </span>
-          </div>
+      
+      {/* Export buttons */}
+      <div className="mb-4 flex space-x-2">
+        <div className="text-sm font-medium text-gray-700 mr-2 flex items-center">
+          {translations.exportLabel}:
         </div>
-
-        <div className="space-y-3">
-          {results.partnerReserves.map((reserve) => {
-            const partner = partners.find(p => p.id === reserve.partnerId);
-            const isExpanded = expandedPartnerId === reserve.partnerId;
-            // Calculate raw values
-            const rawTaxRate = getRawTaxRate(reserve.effectiveTaxRate);
-            const rawReserveAmount = getRawReserveAmount(reserve.reserveAmount);
-            const safetyMarginAmount = getSafetyMarginAmount(reserve.reserveAmount);
-            
-            return (
-              <div key={reserve.partnerId} className="bg-gray-50 p-3 rounded-md">
-                <div 
-                  className="flex justify-between items-center cursor-pointer" 
-                  onClick={() => togglePartnerDetails(reserve.partnerId)}
-                >
-                  <h3 className="font-semibold text-base">{reserve.partnerName}</h3>
-                  <svg 
-                    className={`w-5 h-5 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
+        <button
+          onClick={() => handleExport('csv')}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm"
+        >
+          {translations.exportCSVLabel}
+        </button>
+        <button
+          onClick={() => handleExport('json')}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm"
+        >
+          {translations.exportJSONLabel}
+        </button>
+      </div>
+      
+      {/* Partner Reserves */}
+      <h3 className="text-lg font-semibold mt-6 mb-2">{translations.partnerDetailsLabel}</h3>
+      
+      <div className="space-y-4">
+        {results.partnerReserves.map(partner => {
+          const isExpanded = expandedPartners[partner.partnerId] || false;
+          const rawReserve = getRawReserveAmount(partner.reserveAmount);
+          const safetyAmount = getSafetyMarginAmount(partner.reserveAmount);
+          
+          return (
+            <div key={partner.partnerId} className="border rounded-lg overflow-hidden">
+              {/* Partner Summary Row */}
+              <div 
+                className="bg-gray-50 p-4 cursor-pointer flex flex-wrap items-center"
+                onClick={() => togglePartnerDetails(partner.partnerId)}
+              >
+                <div className="w-full sm:w-1/4 mb-2 sm:mb-0">
+                  <h4 className="font-semibold">{partner.partnerName}</h4>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-1 text-sm mt-2">
-                  <span className="text-gray-800">{translations.shareLabel}</span>
-                  <span className="font-medium text-right">{formatPercentage(reserve.share / 100)}</span>
-                  
-                  <span className="text-gray-800">{translations.effectiveTaxRateLabel}</span>
-                  <span className={`font-medium text-right ${getTaxRateColor(rawTaxRate)}`}>
-                    {formatPercentage(rawTaxRate)}
-                  </span>
-                  
-                  <span className="text-gray-800">{translations.monthlyReserveLabel}</span>
-                  <span className="font-medium text-right">
-                    {formatCurrency(rawReserveAmount)}
-                  </span>
-                  
-                  <span className="text-gray-800">{translations.safetyMarginLabel}</span>
-                  <span className="font-medium text-right">
-                    {formatCurrency(safetyMarginAmount)}
-                  </span>
+                <div className="flex flex-wrap w-full sm:w-3/4 text-sm">
+                  <div className="px-2 w-1/2 sm:w-1/4">
+                    <div className="text-gray-600">{translations.shareLabel}</div>
+                    <div className="font-semibold">{formatPercentage(partner.share / 100)}</div>
+                  </div>
+                  <div className="px-2 w-1/2 sm:w-1/4">
+                    <div className="text-gray-600">{translations.effectiveTaxRateLabel}</div>
+                    <div className="font-semibold">{formatPercentage(partner.effectiveTaxRate)}</div>
+                  </div>
+                  <div className="px-2 w-1/2 sm:w-1/4 mt-2 sm:mt-0">
+                    <div className="text-gray-600">{translations.monthlyReserveLabel}</div>
+                    <div className="font-semibold">{formatCurrency(rawReserve)}</div>
+                  </div>
+                  <div className="px-2 w-1/2 sm:w-1/4 mt-2 sm:mt-0">
+                    <div className="text-gray-600">{translations.safetyMarginAmountLabel}</div>
+                    <div className="font-semibold">{formatCurrency(safetyAmount)}</div>
+                  </div>
                 </div>
-                
-                {isExpanded && partner && (
-                  <div className="mt-4 border-t pt-3">
-                    <div className="mb-4">
-                      <TaxBracketVisualization 
-                        income={partner.yearlyIncome}
-                        totalIncome={partner.yearlyIncome + reserve.annualProfit}
-                        translations={translations}
-                      />
+              </div>
+              
+              {/* Expanded Partner Details */}
+              {isExpanded && (
+                <div className="p-4 bg-white border-t">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">{translations.taxDetailsLabel}</h5>
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.yearlyIncomeLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(
+                              partners.find(p => p.id === partner.partnerId)?.yearlyIncome || 0
+                            )}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.annualProfitLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(partner.annualProfit)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.effectiveTaxRateLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatPercentage(partner.effectiveTaxRate)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.annualTaxBurdenLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(partner.reserveAmount * 12)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                    
-                    <h4 className="font-medium text-sm mb-2">{translations.taxDetailsLabel}</h4>
-                    <div className="grid grid-cols-2 gap-1 text-xs">
-                      <span className="text-gray-800">{translations.annualProfitLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.annualProfit)}</span>
-                      
-                      <span className="text-gray-800">{translations.baseTaxLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.baseTaxAmount)}</span>
-                      
-                      <span className="text-gray-800">{translations.totalTaxLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.totalTaxAmount)}</span>
-                      
-                      <span className="text-gray-800">{translations.additionalTaxLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.additionalTaxAmount)}</span>
-                      
-                      <div className="col-span-2 my-2 border-t"></div>
-                      
-                      <span className="text-gray-800">{translations.incomeTaxLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.taxDetails.incomeTax)}</span>
-                      
-                      <span className="text-gray-800">{translations.solidaritySurchargeLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.taxDetails.solidaritySurcharge)}</span>
-                      
-                      <span className="text-gray-800">{translations.churchTaxLabel}</span>
-                      <span className="text-right">{formatCurrency(reserve.taxDetails.churchTax)}</span>
-                      
-                      <span className="text-gray-800 font-medium">{translations.totalTaxLabel}</span>
-                      <span className="text-right font-medium">{formatCurrency(reserve.taxDetails.totalTax)}</span>
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">{translations.monthlyReserveLabel}</h5>
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.monthlyProfitLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(partner.monthlyProfit)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.monthlyReserveLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(rawReserve)}</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-4 text-gray-600">{translations.safetyMarginAmountLabel}</td>
+                            <td className="py-1 text-right font-medium">{formatCurrency(safetyAmount)}</td>
+                          </tr>
+                          <tr className="font-semibold">
+                            <td className="py-1 pr-4">{translations.totalReserveTitle}</td>
+                            <td className="py-1 text-right">{formatCurrency(partner.reserveAmount)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
       
       <div className="mt-4 text-xs text-gray-700 flex items-center justify-between">

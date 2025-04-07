@@ -1,8 +1,10 @@
-export type TranslationKeys = {
+export interface TranslationKeys {
   // General
   appTitle: string;
   calculatorTitle: string;
   taxYear: string;
+  taxYearLabel: string;
+  disclaimer: string;
   
   // Partner Section
   partnerSectionTitle: string;
@@ -21,6 +23,17 @@ export type TranslationKeys = {
   // GbR Section
   gbrSectionTitle: string;
   monthlyProfitLabel: string;
+  
+  // GbR Type Section
+  gbrTypeLabel: string;
+  freelanceGbRLabel: string;
+  commercialGbRLabel: string;
+  municipalityRateLabel: string;
+  municipalityRateHint: string;
+  
+  // Equitable Calculation
+  equitableCalculationOn: string;
+  equitableCalculationOff: string;
   
   // Advanced Settings
   advancedSettingsToggle: string;
@@ -47,6 +60,7 @@ export type TranslationKeys = {
   effectiveTaxRateLabel: string;
   monthlyReserveLabel: string;
   profitLabel: string;
+  safetyMarginAmountLabel: string;
   
   // Tax Details
   taxDetailsLabel: string;
@@ -58,33 +72,24 @@ export type TranslationKeys = {
   solidaritySurchargeLabel: string;
   churchTaxLabel: string;
   
-  // Tax Bracket Visualization
-  taxBracketVisualizationTitle: string;
-  basicAllowanceLabel: string;
-  progressiveZoneLabel: string;
-  proportionalZone1Label: string;
-  proportionalZone2Label: string;
-  
   // Export
-  exportCSV: string;
-  exportJSON: string;
-  exportPDF: string;
+  exportLabel: string;
+  exportCSVLabel: string;
+  exportJSONLabel: string;
+  exportPDFLabel: string;
   
-  // Settings
-  settingsLabel: string;
-  languageLabel: string;
-  taxYearLabel: string;
-  
-  // Disclaimer
-  disclaimer: string;
-};
+  // Debug
+  debugModeLabel: string;
+}
 
 export const translations: { de: TranslationKeys; en: TranslationKeys } = {
   de: {
     // General
-    appTitle: 'Steuerrücklagenberechner für GbR',
-    calculatorTitle: 'Steuerrücklagenberechner',
+    appTitle: 'Steuerrücklagenrechner für GbR',
+    calculatorTitle: 'Steuerrücklagenrechner',
     taxYear: '2025',
+    taxYearLabel: 'Steuerjahr',
+    disclaimer: 'Hinweis: Diese Berechnung dient nur zu Informationszwecken und ersetzt keine steuerliche Beratung.',
     
     // Partner Section
     partnerSectionTitle: 'Partner',
@@ -96,31 +101,42 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     partnerNameLabel: 'Name',
     partnerNamePlaceholder: 'Partnername eingeben',
     yearlyIncomeLabel: 'Jahreseinkommen',
-    yearlyIncomeHint: 'Voraussichtliches Jahreseinkommen ohne GbR-Anteil',
+    yearlyIncomeHint: 'Erwartetes Jahreseinkommen ohne GbR-Anteil',
     profitShareLabel: 'Gewinnanteil',
     shareLabel: 'Anteil',
     
     // GbR Section
-    gbrSectionTitle: 'GbR Daten',
+    gbrSectionTitle: 'GbR-Daten',
     monthlyProfitLabel: 'Monatlicher Gewinn',
+    
+    // GbR Type Section
+    gbrTypeLabel: 'GbR-Typ',
+    freelanceGbRLabel: 'Freiberufliche GbR',
+    commercialGbRLabel: 'Gewerbliche GbR',
+    municipalityRateLabel: 'Gewerbesteuer-Hebesatz',
+    municipalityRateHint: 'Typischerweise zwischen 300% und 600%',
+    
+    // Equitable Calculation
+    equitableCalculationOn: 'Gerechte Berechnung: EIN',
+    equitableCalculationOff: 'Gerechte Berechnung: AUS',
     
     // Advanced Settings
     advancedSettingsToggle: 'Erweiterte Einstellungen',
     advancedSettingsLabel: 'Erweiterte Einstellungen',
-    basicSettingsLabel: 'Grundeinstellungen',
+    basicSettingsLabel: 'Basis-Einstellungen',
     safetyMarginLabel: 'Sicherheitspuffer',
     safetyMarginDescription: 'Zusätzlicher Puffer für Steuerrücklagen',
     
     // Church & Tax Settings
     churchMemberLabel: 'Kirchenmitglied',
     federalStateLabel: 'Bundesland',
-    federalStateHint: 'Für die korrekte Kirchensteuer',
+    federalStateHint: 'Für korrekte Kirchensteuerberechnung',
     jointAssessmentLabel: 'Zusammenveranlagung',
-    jointAssessmentHint: 'Für verheiratete Paare mit Zusammenveranlagung (Splitting-Tarif)',
+    jointAssessmentHint: 'Für Ehepaare mit gemeinsamer Steuererklärung (Splittingtarif)',
     
     // Results
     resultTitle: 'Steuerrücklagen',
-    totalReserveTitle: 'Gesamte Steuerrücklage',
+    totalReserveTitle: 'Gesamt-Steuerrücklage',
     calculateButton: 'Berechnen',
     resetButton: 'Zurücksetzen',
     percentageLabel: 'Prozentsatz',
@@ -129,10 +145,11 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     effectiveTaxRateLabel: 'Effektiver Steuersatz',
     monthlyReserveLabel: 'Monatliche Rücklage',
     profitLabel: 'Gewinn',
+    safetyMarginAmountLabel: 'Sicherheitspuffer',
     
     // Tax Details
     taxDetailsLabel: 'Steuerdetails',
-    annualProfitLabel: 'Jahresgewinn GbR',
+    annualProfitLabel: 'Jährlicher GbR-Gewinn',
     baseTaxLabel: 'Grundsteuer (ohne GbR)',
     totalTaxLabel: 'Gesamtsteuer',
     additionalTaxLabel: 'Zusätzliche Steuer',
@@ -140,31 +157,23 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     solidaritySurchargeLabel: 'Solidaritätszuschlag',
     churchTaxLabel: 'Kirchensteuer',
     
-    // Tax Bracket Visualization
-    taxBracketVisualizationTitle: 'Steuerklassen-Visualisierung',
-    basicAllowanceLabel: 'Grundfreibetrag',
-    progressiveZoneLabel: 'Progressive Zone',
-    proportionalZone1Label: '42% Zone',
-    proportionalZone2Label: '45% Zone',
-    
     // Export
-    exportCSV: 'Als CSV exportieren',
-    exportJSON: 'Als JSON exportieren',
-    exportPDF: 'Als PDF exportieren',
+    exportLabel: 'Exportieren',
+    exportCSVLabel: 'Als CSV exportieren',
+    exportJSONLabel: 'Als JSON exportieren',
+    exportPDFLabel: 'Als PDF exportieren',
     
-    // Settings
-    settingsLabel: 'Einstellungen',
-    languageLabel: 'Sprache',
-    taxYearLabel: 'Steuerjahr',
-    
-    // Disclaimer
-    disclaimer: 'Diese Berechnung dient nur als Richtwert. Bitte konsultieren Sie einen Steuerberater für verbindliche Auskünfte.'
+    // Debug
+    debugModeLabel: 'Debug-Modus'
   },
+  
   en: {
     // General
     appTitle: 'Tax Reserve Calculator for GbR',
     calculatorTitle: 'Tax Reserve Calculator',
     taxYear: '2025',
+    taxYearLabel: 'Tax Year',
+    disclaimer: 'Note: This calculation is for informational purposes only and does not replace tax advice.',
     
     // Partner Section
     partnerSectionTitle: 'Partner',
@@ -183,6 +192,17 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     // GbR Section
     gbrSectionTitle: 'GbR Data',
     monthlyProfitLabel: 'Monthly Profit',
+    
+    // GbR Type Section
+    gbrTypeLabel: 'GbR Type',
+    freelanceGbRLabel: 'Freelance GbR',
+    commercialGbRLabel: 'Commercial GbR',
+    municipalityRateLabel: 'Trade Tax Rate',
+    municipalityRateHint: 'Typically between 300% and 600%',
+    
+    // Equitable Calculation
+    equitableCalculationOn: 'Equitable Calculation: ON',
+    equitableCalculationOff: 'Equitable Calculation: OFF',
     
     // Advanced Settings
     advancedSettingsToggle: 'Advanced Settings',
@@ -209,6 +229,7 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     effectiveTaxRateLabel: 'Effective Tax Rate',
     monthlyReserveLabel: 'Monthly Reserve',
     profitLabel: 'Profit',
+    safetyMarginAmountLabel: 'Safety Margin',
     
     // Tax Details
     taxDetailsLabel: 'Tax Details',
@@ -220,24 +241,13 @@ export const translations: { de: TranslationKeys; en: TranslationKeys } = {
     solidaritySurchargeLabel: 'Solidarity Surcharge',
     churchTaxLabel: 'Church Tax',
     
-    // Tax Bracket Visualization
-    taxBracketVisualizationTitle: 'Tax Bracket Visualization',
-    basicAllowanceLabel: 'Basic Allowance',
-    progressiveZoneLabel: 'Progressive Zone',
-    proportionalZone1Label: '42% Zone',
-    proportionalZone2Label: '45% Zone',
-    
     // Export
-    exportCSV: 'Export as CSV',
-    exportJSON: 'Export as JSON',
-    exportPDF: 'Export as PDF',
+    exportLabel: 'Export',
+    exportCSVLabel: 'Export as CSV',
+    exportJSONLabel: 'Export as JSON',
+    exportPDFLabel: 'Export as PDF',
     
-    // Settings
-    settingsLabel: 'Settings',
-    languageLabel: 'Language',
-    taxYearLabel: 'Tax Year',
-    
-    // Disclaimer
-    disclaimer: 'This calculation serves as an estimate only. Please consult a tax advisor for binding information.'
+    // Debug
+    debugModeLabel: 'Debug Mode'
   }
 }; 
